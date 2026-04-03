@@ -1,0 +1,183 @@
+C51 COMPILER V9.54   MAIN                                                                  04/02/2026 16:25:46 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.l
+                    -st) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "Delay.h"
+   3          #include "Timer0.h"
+   4          #include "Key.h"
+   5          
+   6          sbit Buzzer=P2^5;
+   7          
+   8          //宏定义播放速率，方便阅读修改
+   9          #define SPEED    1000
+  10          
+  11          //宏定义音符，方便写谱
+  12          #define P    0
+  13          #define L1   1
+  14          #define L1_  2
+  15          #define L2   3
+  16          #define L2_  4
+  17          #define L3   5
+  18          #define L4   6
+  19          #define L4_  7
+  20          #define L5   8
+  21          #define L5_  9
+  22          #define L6   10
+  23          #define L6_  11
+  24          #define L7   12
+  25          #define M1   13
+  26          #define M1_  14
+  27          #define M2   15
+  28          #define M2_  16
+  29          #define M3   17
+  30          #define M4   18
+  31          #define M4_  19
+  32          #define M5   20
+  33          #define M5_  21
+  34          #define M6   22
+  35          #define M6_  23
+  36          #define M7   24
+  37          #define H1   25
+  38          #define H1_  26
+  39          #define H2   27
+  40          #define H2_  28
+  41          #define H3   29
+  42          #define H4   30
+  43          #define H4_  31
+  44          #define H5   32
+  45          #define H5_  33
+  46          #define H6   34
+  47          #define H6_  35
+  48          #define H7   36 
+  49          #define G1   37
+  50          #define G1_  38
+  51          #define G2   39
+  52          #define G2_  40
+  53          #define G3   41
+  54          #define G4   42
+C51 COMPILER V9.54   MAIN                                                                  04/02/2026 16:25:46 PAGE 2   
+
+  55          #define G4_  43
+  56          #define G5   44
+  57          #define G5_  45
+  58          #define G6   46
+  59          #define G6_  47
+  60          #define G7   48 
+  61          #define E1   49
+  62          #define E1_  50
+  63          #define E2   51
+  64          #define E2_  52
+  65          #define E3   53
+  66          #define E4   54
+  67          #define E4_  55
+  68          #define E5   56
+  69          #define E5_  57
+  70          #define E6   58
+  71          #define E6_  59
+  72          #define E7   60
+  73          
+  74          //音符数组
+  75          unsigned int code FreqTable[]={                                         
+  76                          0,61719,61939,62135,62331,62506,62679,62833,62985,63132,63263,63390,63512,
+  77                          63628,63731,63835,63928,64021,64103,64185,64260,64331,64400,64463,64524,
+  78                          64580,64633,64684,64732,64777,64820,64860,64898,64934,64968,65000,65030,
+  79                          65058,65085,65110,65134,65157,65178,65198,65217,65235,65252,65268,65283,
+  80                          65297,65310,65323,65335,65346,65357,65367,65377,65385,65394,65402,65409
+  81          };
+  82          
+  83          //乐谱数组：花海
+  84          unsigned char code Music[]={                                    
+  85          
+  86                  G1,2,G2,2,G3,2,G5,1,G5,9,G3,2,G2,2,G1,2,G2,1,G3,9,G1,2,G2,2,G3,2,G7,1,E1,7,
+  87                  E1,2,G7,2,E1,1,G7,3,G5,1,G6,3,G5,6,G1,2,G2,2,G3,2,G5,1,G5,9,G3,2,G2,2,G1,2,G2,1,G1,9,
+  88                  G1,2,G2,2,G3,2,G5,1,G1,6,G1,2,G1,2,H7,2,H6,2,H7,2,G1,12,G1,1,G3,3,G3,8,G3,2,G2,2,G1,2,
+  89                  G2,4,G3,2+4,P,4,G1,1,G3,2+1,G3,4+4,G4,2,G3,2,G5,4,G1,4+4,P,4,G1,1,G4,2+1,G4,4+4,G4,2,G3,2,
+  90                  G1,2,H5,2+2,G3,4+2,P,4,G1,1,G3,2+1,G2,4,G1,1,G3,2+1,G2,4,G1,1,G3,2+1,G2,4+4+4,G1,1,G3,3,G3,4+4,
+  91                  G3,2,G2,2,G1,2,G2,4,G5,6,P,4,G1,1,G3,3,G3,8,G4,2,G3,2,G5,4,G1,4+4,P,4,G1,1,G3,3,G4,8,G4,2,G3,2,
+  92                  G1,2,G5,4,G3,2,E1,8,P,2,G5,2,G4,2,G3,2,G1,2,G1,2,H7,4,G1,10,G1,2,G2,2,G3,2,G5,1,G5,9,G3,2,G2,2,
+  93                  G1,2,G2,1,G3,9, G1,2,G2,2,G3,2,E1,1,E1,7,E1,2,G7,2,G6,1,G5,3,G6,1,G6,3,G5,6,G1,2,G2,2,G3,2,G5,1,        
+  94                  G5,9,G3,2,G2,2,G1,2,G2,1,G1,9,G1,2,G2,2,G3,2,G5,2,G5,2,G4,2,G4,2,G3,2,E1,2,G3,2,G3,4,G2,2,P,4,G1,2,
+  95                  G2,2,G3,2,G5,1,G5,9,G3,2,G2,2,G1,2,G2,1,G3,9,G1,2,G2,2,G3,2,E1,1,E1,7,E1,2,G7,2,G6,1,G5,3,G6,1, 
+  96                  G6,3,G5,6,G1,2,G2,2,G3,2,G5,1,G5,9,G3,2,G2,2,G1,2,G2,1,G1,9,G1,2,G2,2,G3,2,G5,1,G1,9,G1,2,H7,2, 
+  97                  H6,2,H7,1,G1,13,G3,12,
+  98                  0xFF
+  99          };
+ 100                  
+ 101                  
+ 102          unsigned char FreqSelect,MusicSelect,KeyNum;
+ 103                  
+ 104          void main()
+ 105          {
+ 106   1              Timer0Init();                                                                           //定时器初始化
+ 107   1              while(1)
+ 108   1              {       
+ 109   2                      //读入键码
+ 110   2                      KeyNum=Key();
+ 111   2                      
+ 112   2                      //播放音乐（音乐结束判断）
+ 113   2                      if(Music[MusicSelect]!=0)
+ 114   2              {               
+ 115   3                      FreqSelect=Music[MusicSelect];
+ 116   3                      MusicSelect++;
+C51 COMPILER V9.54   MAIN                                                                  04/02/2026 16:25:46 PAGE 3   
+
+ 117   3                      Delay(SPEED/4*Music[MusicSelect]);
+ 118   3                      MusicSelect++;
+ 119   3                      TR0=0;
+ 120   3                      Delay(5);
+ 121   3                      TR0=1;
+ 122   3              }
+ 123   2              else{
+ 124   3                              TR0=0;
+ 125   3                              while(1);
+ 126   3                      }
+ 127   2              
+ 128   2                      //判断键码
+ 129   2                      if(KeyNum==1)                                                                   //按下按键1，音乐重头播放    
+ 130   2              {       
+ 131   3                      TR0=0;
+ 132   3                      FreqSelect=0;
+ 133   3                      MusicSelect=0;
+ 134   3                      KeyNum=0;
+ 135   3              }
+ 136   2                      if(KeyNum==2)                                                                   //按下按键2，音乐关闭，关闭后按键1无法响应
+ 137   2              {
+ 138   3                      TR0=0;
+ 139   3                      while(Key()!=3);                                                                //按下按键3，音乐继续播放
+ 140   3                      TR0=1;  
+ 141   3              }
+ 142   2              }
+ 143   1      }
+ 144          
+ 145          
+ 146          
+ 147          void Timer0_Routine() interrupt 1
+ 148          {
+ 149   1              if(FreqTable[FreqSelect])
+ 150   1      {
+ 151   2              TL0 = FreqTable[FreqSelect]%256;        //设置定时初值
+ 152   2              TH0 = FreqTable[FreqSelect]/256;                //设置定时初值
+ 153   2              Buzzer=!Buzzer;
+ 154   2      }
+ 155   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    156    ----
+   CONSTANT SIZE    =    523    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
